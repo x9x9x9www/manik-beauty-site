@@ -359,7 +359,7 @@ const STRIP = ["Запись за минуту","Матча-латте в под
    а раздел «Кабинет администратора» покажет все записи.
    Пример: const API_BASE = "https://manik-beauty.amvera.io";
    ===================================================================== */
-const API_BASE = "https://manik-taxidog.amvera.io";
+const API_BASE = "https://manik-butik-taxidog.waw0.amvera.tech";
 const SERVER = !!API_BASE;
 
 async function api(path, {method="GET", body=null, token=null} = {}){
@@ -508,7 +508,7 @@ function render(){
     p.innerHTML = `<h3>Выберите время</h3>
       <p class="lead" style="font-size:16px;margin:8px 0 14px">Мастер ${mst(state.master).name} · ${fmtDay(state.date)}</p>
       ${free?"":`<div class="alert err show">На этот день свободных окон нет — выберите другую дату.</div>`}
-      <div class="times">${slots}</div>${nav("Назад","Далее",!!state.time)}`;
+      <div class="times">${slots}</div>${nav("Назад","Дал��е",!!state.time)}`;
   } else if(state.step===4){
     const s = svc(state.service);
     p.innerHTML = `<h3>Ваши контакты</h3>
