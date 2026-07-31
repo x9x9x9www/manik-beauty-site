@@ -13,9 +13,19 @@
   --line:#F0E4E8; --r:28px; --r-sm:18px;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;background:var(--cream);color:var(--ink);
-  font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+html{scroll-behavior:smooth;scroll-padding-top:96px}
+body{margin:0;color:var(--ink);min-height:100vh;
+  background:
+    radial-gradient(circle at 8% 8%,rgba(255,79,139,.18) 0,rgba(255,79,139,0) 32%),
+    radial-gradient(circle at 92% 16%,rgba(156,196,107,.22) 0,rgba(156,196,107,0) 34%),
+    radial-gradient(circle at 52% 88%,rgba(255,225,236,.68) 0,rgba(255,225,236,0) 38%),
+    linear-gradient(135deg,#fff8f4 0%,#fff1f6 45%,#f4f8ec 100%);
+  background-attachment:fixed;
+  font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.34;
+  background-image:radial-gradient(rgba(226,58,115,.18) .7px,transparent .7px);
+  background-size:22px 22px;mask-image:linear-gradient(to bottom,black,transparent 82%)}
 img{max-width:100%;display:block}
 h1,h2,h3,h4{margin:0;line-height:1.05;letter-spacing:-.03em;font-weight:800}
 h1{font-size:66px}
@@ -23,11 +33,20 @@ h2{font-size:44px}
 h3{font-size:22px;letter-spacing:-.02em}
 p{margin:0}
 button{font:inherit}
+button,a,input,textarea{transition:border-color .28s ease,background-color .28s ease,color .28s ease,box-shadow .28s ease,transform .28s cubic-bezier(.22,1,.36,1)}
 .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
 section{scroll-margin-top:104px;padding:28px 0}
 .tag{display:inline-block;background:var(--white);border:1px solid var(--line);color:var(--muted);
   border-radius:999px;padding:7px 14px;font-size:13px;font-weight:600}
 .lead{color:var(--muted);font-size:18px;max-width:620px}
+
+/* motion + glass */
+.bar,.dish,.booking-box,.mine-item,.empty,.work,.faq,.contact-card{
+  background:rgba(255,255,255,.82);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px)}
+#panel>*{animation:panelIn .46s cubic-bezier(.22,1,.36,1) both}
+@keyframes panelIn{from{opacity:0;transform:translateY(12px) scale(.992)}to{opacity:1;transform:none}}
+.reveal-item{opacity:0;transform:translateY(30px) scale(.985);transition:opacity .75s ease,transform .75s cubic-bezier(.22,1,.36,1)}
+.reveal-item.is-visible{opacity:1;transform:none}
 
 /* header */
 header{position:sticky;top:0;z-index:60;padding:12px 0;background:linear-gradient(var(--cream) 70%,transparent)}
@@ -41,8 +60,9 @@ header{position:sticky;top:0;z-index:60;padding:12px 0;background:linear-gradien
 .menu button:hover{background:var(--pink-tint);color:var(--ink)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:13px 26px;border:0;
   border-radius:999px;background:var(--pink);color:#fff;font-weight:700;font-size:16px;cursor:pointer;
-  transition:transform .12s ease,background .15s;text-decoration:none}
-.btn:hover{background:var(--pink-deep);transform:translateY(-1px)}
+  transition:transform .32s cubic-bezier(.22,1,.36,1),background .25s ease,box-shadow .25s ease;text-decoration:none}
+.btn:hover{background:var(--pink-deep);transform:translateY(-3px);box-shadow:0 12px 26px rgba(226,58,115,.2)}
+.btn:active{transform:translateY(0) scale(.98)}
 .btn.matcha{background:var(--matcha)}
 .btn.matcha:hover{background:var(--matcha-deep)}
 .btn.light{background:var(--white);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
@@ -119,8 +139,16 @@ header{position:sticky;top:0;z-index:60;padding:12px 0;background:linear-gradien
 .field label{display:block;font-weight:700;font-size:14px;margin-bottom:7px}
 .field input,.field textarea{width:100%;min-height:48px;padding:13px 16px;border:2px solid var(--line);border-radius:var(--r-sm);
   font:inherit;background:var(--white);color:var(--ink)}
-.field input:focus,.field textarea:focus{outline:0;border-color:var(--pink)}
+.field input:focus,.field textarea:focus{outline:0;border-color:var(--pink);box-shadow:0 0 0 5px rgba(255,79,139,.1)}
 .field .hint{font-size:13px;color:var(--muted);margin-top:6px}
+.phone-control{display:flex;align-items:center;min-height:52px;border:2px solid var(--line);border-radius:var(--r-sm);
+  background:rgba(255,255,255,.9);overflow:hidden;transition:border-color .28s ease,box-shadow .28s ease}
+.phone-control:focus-within{border-color:var(--pink);box-shadow:0 0 0 5px rgba(255,79,139,.1)}
+.phone-prefix{align-self:stretch;display:flex;align-items:center;padding:0 4px 0 16px;font-weight:750;color:var(--ink);
+  user-select:none;-webkit-user-select:none;pointer-events:none;flex:none}
+.field .phone-control input{border:0!important;box-shadow:none!important;border-radius:0;padding-left:5px;min-width:0;background:transparent}
+.field .phone-control input:focus{outline:0}
+
 .summary{background:var(--cream);border-radius:var(--r-sm);padding:18px 20px;margin:18px 0}
 .summary div{display:flex;justify-content:space-between;gap:16px;padding:7px 0}
 .summary div span{color:var(--muted)}
@@ -197,6 +225,8 @@ footer span{color:rgba(255,255,255,.65);font-size:14px}
   .booking-box{padding:22px 18px}
   .menu-grid,.people,.works,.contacts,.opt-grid{grid-template-columns:1fr}
   .actions .btn{flex:1}
+  .summary div{align-items:flex-start}
+  .summary div b{max-width:62%;overflow-wrap:anywhere}
   footer{padding:28px 24px}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
@@ -428,7 +458,7 @@ $("#services-grid").innerHTML = SERVICES.map(s=>`
     <h3>${s.title}</h3>
     <small>${s.desc} · ${s.dur}</small>
     <div class="price">${money(s.price)}</div>
-    <button class="btn sm" data-book="${s.id}">Записат��ся</button>
+    <button class="btn sm" data-book="${s.id}">Записаться</button>
   </article>`).join("");
 $("#masters-grid").innerHTML = MASTERS.map(m=>`
   <article class="person">
@@ -508,7 +538,7 @@ function render(){
     p.innerHTML = `<h3>Выберите время</h3>
       <p class="lead" style="font-size:16px;margin:8px 0 14px">Мастер ${mst(state.master).name} · ${fmtDay(state.date)}</p>
       ${free?"":`<div class="alert err show">На этот день свободных окон нет — выберите другую дату.</div>`}
-      <div class="times">${slots}</div>${nav("Назад","Дал��е",!!state.time)}`;
+      <div class="times">${slots}</div>${nav("Назад","Далее",!!state.time)}`;
   } else if(state.step===4){
     const s = svc(state.service);
     p.innerHTML = `<h3>Ваши контакты</h3>
@@ -521,8 +551,10 @@ function render(){
       <div class="field"><label for="f-name">Имя</label>
         <input id="f-name" maxlength="50" placeholder="Как к вам обращаться" value="${state.name}"></div>
       <div class="field"><label for="f-phone">Телефон</label>
-        <input id="f-phone" maxlength="20" inputmode="tel" placeholder="+7 900 000-00-00" value="${state.phone}">
-        <p class="hint">Позвоним только для подтверждения.</p></div>
+        <div class="phone-control"><span class="phone-prefix" aria-hidden="true">+7</span>
+          <input id="f-phone" maxlength="13" inputmode="numeric" autocomplete="tel-national"
+            aria-label="Номер телефона после плюс семь" placeholder="900 000-00-00" value="${phoneLocal(state.phone)}"></div>
+        <p class="hint">Введите 10 цифр после +7. Позвоним только для подтверждения.</p></div>
       <div class="field"><label for="f-note">Комментарий <span style="font-weight:500;color:var(--muted)">— необязательно</span></label>
         <textarea id="f-note" rows="3" maxlength="300" placeholder="Например: нужно снятие старого покрытия">${state.note}</textarea></div>
       ${nav("Назад","Подтвердить запись",true)}`;
@@ -535,7 +567,7 @@ function render(){
       <p class="lead" style="margin:12px auto 0">Ждём вас ${fmtDT(b.dt)} — мастер ${mst(b.master).name}. Напомним о визите за день и за 3 часа.</p>
       <div class="summary" style="text-align:left;max-width:460px;margin:22px auto 0">
         <div><span>Услуга</span><b>${svc(b.service).title}</b></div>
-        <div><span>Сто��мость</span><b>${money(svc(b.service).price)}</b></div>
+        <div><span>Стоимость</span><b>${money(svc(b.service).price)}</b></div>
         <div><span>Имя</span><b>${b.name}</b></div>
         <div><span>Телефон</span><b>${b.phone}</b></div>
       </div>
@@ -547,12 +579,14 @@ function render(){
 }
 
 async function submit(){
-  const name = $("#f-name").value.trim(), phone = $("#f-phone").value.trim();
+  const name = $("#f-name").value.trim();
+  const localPhone = phoneDigits($("#f-phone").value);
+  const phone = "+7 " + formatPhoneLocal(localPhone);
   state.name = name; state.phone = phone; state.note = $("#f-note").value.trim();
   const err = $("#form-err");
   const fail = m => { err.textContent = m; err.classList.add("show"); };
   if(name.length < 2) return fail("Укажите имя — минимум 2 символа.");
-  if(!/^[+]?[\d\s().-]{10,20}$/.test(phone)) return fail("Проверьте номер: например, +7 900 000-00-00.");
+  if(localPhone.length !== 10) return fail("Введите ровно 10 цифр после +7.");
   if(future().length >= MAX_ACTIVE) return fail("У вас уже 3 активные записи. Отмените одну в разделе «Мои записи».");
   if(taken(state.master, state.time)) return fail("Это время только что заняли. Выберите другое окно.");
   const b = {id:Date.now(), service:state.service, master:state.master, dt:state.time, name, phone, note:state.note};
@@ -603,31 +637,34 @@ document.addEventListener("click", e=>{
   state.service = t.dataset.book; state.step = 1; render(); goTo("booking");
 });
 
-/* ----- маска телефона: +7 и пробелы автоматически ----- */
-function maskPhone(raw){
-  let s = String(raw||"").trim().replace(/^\+?7/,"");   // наш собственный префикс не считаем цифрой номера
-  let d = s.replace(/\D/g,"");
-  while(d.length > 10 && (d[0] === "7" || d[0] === "8")) d = d.slice(1);  // вставили номер с 8 или +7
-  d = d.slice(0,10);
-  const a = d.slice(0,3), b = d.slice(3,6), c = d.slice(6,8), e = d.slice(8,10);
-  let out = "+7";
-  if(a) out += " " + a;
-  if(b) out += " " + b;
-  if(c) out += "-" + c;
-  if(e) out += "-" + e;
-  return out;
+/* ----- телефон: +7 закреплён отдельно, поле принимает строго 10 цифр ----- */
+function phoneDigits(raw){
+  let d = String(raw || "").replace(/\D/g, "");
+  if(d.length > 10 && (d[0] === "7" || d[0] === "8")) d = d.slice(1);
+  return d.slice(0, 10);
 }
+function formatPhoneLocal(raw){
+  const d = phoneDigits(raw);
+  const a=d.slice(0,3), b=d.slice(3,6), c=d.slice(6,8), e=d.slice(8,10);
+  return a + (b ? " " + b : "") + (c ? "-" + c : "") + (e ? "-" + e : "");
+}
+function phoneLocal(raw){ return formatPhoneLocal(raw); }
 function bindPhone(input){
   if(!input) return;
-  const apply = () => { input.value = maskPhone(input.value); };
-  if(input.value.trim()) apply();
-  input.addEventListener("focus", () => { if(!input.value.trim()){ input.value = "+7 "; } });
-  input.addEventListener("input", () => {
-    const atEnd = input.selectionStart === input.value.length;
-    apply();
-    if(atEnd) input.setSelectionRange(input.value.length, input.value.length);
+  const apply = () => {
+    const formatted = formatPhoneLocal(input.value);
+    input.value = formatted;
+    input.setSelectionRange(formatted.length, formatted.length);
+  };
+  apply();
+  input.addEventListener("beforeinput", e => {
+    const full = phoneDigits(input.value).length >= 10;
+    const deleting = e.inputType && e.inputType.startsWith("delete");
+    const replacing = input.selectionStart !== input.selectionEnd;
+    if(full && !deleting && !replacing && e.data && /\d/.test(e.data)) e.preventDefault();
   });
-  input.addEventListener("blur", () => { if(input.value.trim() === "+7" || input.value.trim() === "+7 ") input.value = ""; });
+  input.addEventListener("input", apply);
+  input.addEventListener("paste", () => setTimeout(apply, 0));
 }
 
 /* ----- мои записи ----- */
@@ -670,7 +707,7 @@ function renderAdmin(rows, message){
       dateTime:b.dt, name:b.name, phone:b.phone, note:b.note, source:"этот браузер"
     }));
     box.innerHTML = `<div class="alert err show">Сервер не подключён: в файле сайта не заполнено поле API_BASE, поэтому видны только записи, сделанные на этом устройстве.</div>
-      <div class="mine">${local.length ? local.map(adminRow).join("") : `<div class="empty">��аписей пока нет.</div>`}</div>`;
+      <div class="mine">${local.length ? local.map(adminRow).join("") : `<div class="empty">Записей пока нет.</div>`}</div>`;
     return;
   }
   if(!adminToken){
@@ -735,6 +772,25 @@ $("#admin-box").addEventListener("click", async e=>{
 
 render(); renderMine();
 if(SERVER && adminToken) loadAdmin(); else renderAdmin(null);
+
+/* Плавное появление блоков во время прокрутки */
+(function initScrollReveal(){
+  const items = document.querySelectorAll(".head,.dish,.booking-box,.person,.work,.faq,.contact-card,.cta-card,.mine-item,footer");
+  if(!("IntersectionObserver" in window)) return items.forEach(el => el.classList.add("is-visible"));
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting){
+        entry.target.classList.add("is-visible");
+        observer.unobserve(entry.target);
+      }
+    });
+  }, {threshold:.12, rootMargin:"0px 0px -7% 0px"});
+  items.forEach((el,i) => {
+    el.classList.add("reveal-item");
+    el.style.transitionDelay = `${Math.min(i % 4, 3) * 55}ms`;
+    observer.observe(el);
+  });
+})();
 </script>
 </body>
 </html>
