@@ -582,6 +582,9 @@ footer b{font-family:var(--hand);font-size:32px}
  .portfolio-window{margin:0 -18px;padding-left:18px}.work{display:block;flex-basis:90%}.work .swatch{border-right:0;border-bottom:2px solid var(--scrap-black)}
 }
 
+
+.timezone-badge{display:inline-flex;align-items:center;gap:7px;margin-bottom:15px;padding:7px 10px;border:1.5px solid var(--scrap-black);background:var(--scrap-matcha);box-shadow:3px 3px 0 var(--scrap-black);font:800 11px/1.2 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;text-transform:uppercase;letter-spacing:.04em}
+
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}.reveal-item{opacity:1!important;transform:none!important}}
 </style>
 </head>
@@ -655,6 +658,7 @@ footer b{font-family:var(--hand);font-size:32px}
       </div>
     </div>
     <div class="booking-box">
+      <div class="timezone-badge" title="Все даты и время записи рассчитываются по московскому часовому поясу">🕒 Московское время · МСК (UTC+3)</div>
       <div class="steps" id="steps"></div>
       <div id="panel"></div>
     </div>
@@ -771,12 +775,25 @@ async function api(path, {method="GET", body=null, token=null} = {}){
 
 const HOURS = [10,12,14,16,18];
 const MAX_DAYS = 30, LEAD_MIN = 30, MAX_ACTIVE = 3;
+const MOSCOW_TIME_ZONE = "Europe/Moscow";
+const MOSCOW_UTC_OFFSET = "+03:00";
 const WD = ["вс","пн","вт","ср","чт","пт","сб"];
 const MON = ["янв","фев","мар","апр","мая","июн","июл","авг","сен","окт","ноя","дек"];
 
 const $ = s => document.querySelector(s);
 const pad = n => String(n).padStart(2,"0");
-const iso = d => d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const isoUTC = d => d.getUTCFullYear()+"-"+pad(d.getUTCMonth()+1)+"-"+pad(d.getUTCDate());
+const dateUTC = ds => new Date(ds+"T00:00:00Z");
+const moscowDateKey = (value=new Date()) => {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone:MOSCOW_TIME_ZONE, year:"numeric", month:"2-digit", day:"2-digit"
+  }).formatToParts(value).reduce((acc,p)=>(acc[p.type]=p.value,acc),{});
+  return `${parts.year}-${parts.month}-${parts.day}`;
+};
+const addMoscowDays = (dateKey, amount) => {
+  const d=dateUTC(dateKey); d.setUTCDate(d.getUTCDate()+amount); return isoUTC(d);
+};
+const slotEpoch = dt => Date.parse(dt.replace(" ","T")+":00"+MOSCOW_UTC_OFFSET);
 const money = n => n.toLocaleString("ru-RU")+" ₽";
 const KEY = "manikbeauty.bookings.v2";
 /* память в первую очередь: если localStorage недоступен (встроенное окно, приватный режим),
@@ -795,12 +812,12 @@ const store = list => {
   MEM = Array.isArray(list) ? list : [];
   try { localStorage.setItem(KEY, JSON.stringify(MEM)) } catch(e){ PERSISTS = false }
 };
-const future = () => load().filter(b => new Date(b.dt.replace(" ","T")) > new Date());
+const future = () => load().filter(b => slotEpoch(b.dt) > Date.now());
 const svc = id => SERVICES.find(s=>s.id===id);
 const mst = id => MASTERS.find(m=>m.id===id);
-const fmtDT = dt => { const d = new Date(dt.replace(" ","T"));
-  return d.getDate()+" "+MON[d.getMonth()]+", "+WD[d.getDay()]+" · "+pad(d.getHours())+":"+pad(d.getMinutes()); };
-const fmtDay = ds => { const d = new Date(ds+"T00:00"); return d.getDate()+" "+MON[d.getMonth()]+", "+WD[d.getDay()]; };
+const fmtDT = dt => { const [ds,tm] = dt.split(" "), d = dateUTC(ds);
+  return d.getUTCDate()+" "+MON[d.getUTCMonth()]+", "+WD[d.getUTCDay()]+" · "+tm+" МСК"; };
+const fmtDay = ds => { const d = dateUTC(ds); return d.getUTCDate()+" "+MON[d.getUTCMonth()]+", "+WD[d.getUTCDay()]+" · МСК"; };
 
 /* ----- навигация: работает и внутри iframe, где якорные ссылки отключены ----- */
 function goTo(id){
@@ -816,7 +833,7 @@ document.addEventListener("click", e => {
 });
 
 /* ----- статика ----- */
-$("#year").textContent = new Date().getFullYear();
+$("#year").textContent = dateUTC(moscowDateKey()).getUTCFullYear();
 $("#strip").innerHTML = (STRIP.concat(STRIP)).map(t=>`<span>${t} •</span>`).join("");
 $("#services-grid").innerHTML = SERVICES.map(s=>`
   <article class="dish">
@@ -861,7 +878,7 @@ async function loadBusy(master, date){
     BUSY[busyKey(master,date)] = (data && data.busy) || [];
   } catch(e){ /* нет связи — показываем все окна */ }
 }
-const past = dt => new Date(dt.replace(" ","T")).getTime() < Date.now() + LEAD_MIN*60000;
+const past = dt => slotEpoch(dt) < Date.now() + LEAD_MIN*60000;
 
 function nav(back, next, on){
   return `<div class="actions">
@@ -890,15 +907,15 @@ function render(){
           <span><b>${m.name}</b><small>${m.role}</small></span></span></button>`).join("")}</div>
       ${nav("Назад","Далее",!!state.master)}`;
   } else if(state.step===2){
-    const today = new Date(); today.setHours(0,0,0,0);
+    const todayKey = moscowDateKey();
     let days = "";
     for(let i=0;i<=MAX_DAYS;i++){
-      const d = new Date(today); d.setDate(today.getDate()+i); const key = iso(d);
+      const key = addMoscowDays(todayKey,i), d = dateUTC(key);
       days += `<button class="day ${state.date===key?"sel":""}" data-date="${key}">
-        <i>${WD[d.getDay()]}</i><b>${d.getDate()}</b><u>${MON[d.getMonth()]}</u></button>`;
+        <i>${WD[d.getUTCDay()]}</i><b>${d.getUTCDate()}</b><u>${MON[d.getUTCMonth()]}</u></button>`;
     }
     p.innerHTML = `<h3>Выберите дату</h3>
-      <p class="lead" style="font-size:16px;margin:8px 0 14px">Запись открыта на 30 дней вперёд.</p>
+      <p class="lead" style="font-size:16px;margin:8px 0 14px">Запись открыта на 30 дней вперёд. Все даты и время указаны по Москве (МСК, UTC+3).</p>
       <div class="days">${days}</div>${nav("Назад","Далее",!!state.date)}`;
   } else if(state.step===3){
     const slots = HOURS.map(h=>{
@@ -907,8 +924,8 @@ function render(){
         title="${old?"время прошло":(busy?"занято":"свободно")}">${pad(h)}:00</button>`;
     }).join("");
     const free = HOURS.some(h=>{const dt=`${state.date} ${pad(h)}:00`; return !taken(state.master,dt) && !past(dt)});
-    p.innerHTML = `<h3>Выберите время</h3>
-      <p class="lead" style="font-size:16px;margin:8px 0 14px">Мастер ${mst(state.master).name} · ${fmtDay(state.date)}</p>
+    p.innerHTML = `<h3>Выберите время <small style="font:700 12px/1 sans-serif">МСК</small></h3>
+      <p class="lead" style="font-size:16px;margin:8px 0 14px">Мастер ${mst(state.master).name} · ${fmtDay(state.date)} · UTC+3</p>
       ${free?"":`<div class="alert err show">На этот день свободных окон нет — выберите другую дату.</div>`}
       <div class="times">${slots}</div>${nav("Назад","Далее",!!state.time)}`;
   } else if(state.step===4){
@@ -969,7 +986,7 @@ async function submit(){
       const saved = await api("/api/booking", {method:"POST", body:{
         service: svc(state.service).title, serviceId: state.service,
         master: mst(state.master).name,  masterId: state.master,
-        dateTime: state.time, name, phone, note: state.note
+        dateTime: state.time, timeZone: MOSCOW_TIME_ZONE, name, phone, note: state.note
       }});
       if(saved && saved.id) b.serverId = saved.id;
     } catch(err){
