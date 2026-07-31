@@ -680,11 +680,35 @@ function renderMine(){
     </div>`).join("")
     : `<div class="empty">Активных записей пока нет.<br><button class="btn sm" style="margin-top:14px" data-go="booking">Записаться онлайн</button></div>`);
 }
-$("#mine-list").addEventListener("click", e=>{
+$("#mine-list").addEventListener("click", async e=>{
   const t = e.target.closest("[data-cancel]"); if(!t) return;
-  if(!confirm("Отменить эту запись?")) return;
-  store(load().filter(b=>b.id!==Number(t.dataset.cancel)));
-  renderMine(); renderAdmin(); if(state.step===3) render();
+  const localId = Number(t.dataset.cancel);
+  const booking = load().find(b => b.id === localId);
+  if(!booking || !confirm("Отменить эту запись?")) return;
+
+  const oldText = t.textContent;
+  t.disabled = true;
+  t.textContent = "Отменяем…";
+  try {
+    if(SERVER && booking.serverId){
+      await api(`/api/appointments/${encodeURIComponent(booking.serverId)}/cancel`, {
+        method:"POST", body:{phone:booking.phone}
+      });
+    } else if(SERVER && !booking.serverId){
+      throw new Error("Эта старая запись не связана с сервером. Отмените её через администратора.");
+    }
+
+    store(load().filter(b => b.id !== localId));
+    const key = busyKey(booking.master, booking.dt.slice(0,10));
+    if(BUSY[key]) BUSY[key] = BUSY[key].filter(dt => dt !== booking.dt);
+    renderMine();
+    if(SERVER && adminToken) loadAdmin(); else renderAdmin();
+    if(state.step===3) loadBusy(state.master,state.date).then(render); else render();
+  } catch(err){
+    t.disabled = false;
+    t.textContent = oldText;
+    alert(err.message || "Не удалось отменить запись. Попробуйте ещё раз.");
+  }
 });
 
 /* ----- кабинет администратора ----- */
